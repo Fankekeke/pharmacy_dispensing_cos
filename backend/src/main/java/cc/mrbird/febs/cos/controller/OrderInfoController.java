@@ -1,0 +1,300 @@
+package cc.mrbird.febs.cos.controller;
+
+
+import cc.mrbird.febs.common.exception.FebsException;
+import cc.mrbird.febs.common.utils.R;
+import cc.mrbird.febs.cos.entity.OrderDetail;
+import cc.mrbird.febs.cos.entity.OrderInfo;
+import cc.mrbird.febs.cos.entity.PharmacyInfo;
+import cc.mrbird.febs.cos.entity.StaffInfo;
+import cc.mrbird.febs.cos.entity.vo.OrderDetailVo;
+import cc.mrbird.febs.cos.entity.vo.OrderInfoVo;
+import cc.mrbird.febs.cos.service.IOrderDetailService;
+import cc.mrbird.febs.cos.service.IOrderInfoService;
+import cc.mrbird.febs.cos.service.IPharmacyInfoService;
+import cc.mrbird.febs.cos.service.IStaffInfoService;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.NumberUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+/**
+ * @author FanK
+ */
+@RestController
+@RequestMapping("/cos/order-info")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class OrderInfoController {
+
+    private final IOrderInfoService orderInfoService;
+
+    private final IStaffInfoService staffInfoService;
+
+    private final IPharmacyInfoService pharmacyInfoService;
+
+    private final IOrderDetailService orderDetailService;
+
+    /**
+     * 分页获取订单信息
+     *
+     * @param page      分页对象
+     * @param orderInfo 订单信息
+     * @return 结果
+     */
+    @GetMapping("/page")
+    public R page(Page<OrderInfo> page, OrderInfo orderInfo) {
+        if (orderInfo.getStaffId() != null) {
+            StaffInfo staff = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, orderInfo.getStaffId()));
+            if (staff != null) {
+                PharmacyInfo pharmacy = pharmacyInfoService.getOne(Wrappers.<PharmacyInfo>lambdaQuery().eq(PharmacyInfo::getId, staff.getPharmacyId()));
+                orderInfo.setPharmacyId(pharmacy.getUserId());
+            }
+        }
+        return R.ok(orderInfoService.selectOrderPage(page, orderInfo));
+    }
+
+    /**
+     * 订单审核
+     * @param orderId
+     * @param aiRemark
+     * @return
+     */
+    @GetMapping("/orderAudit")
+    public R orderAudit(Integer orderId, String aiRemark) {
+        return R.ok(orderInfoService.update(Wrappers.<OrderInfo>lambdaUpdate().set(OrderInfo::getAuditRemark, aiRemark).set(OrderInfo::getOrderStatus, 0).eq(OrderInfo::getId, orderId)));
+    }
+
+    /**
+     * 用户提交订单
+     *
+     * @param orderDetailVo 订单信息
+     * @return 结果
+     */
+    @PostMapping("/orderSubmit")
+    public R orderSubmit(OrderDetailVo orderDetailVo) throws FebsException {
+        return R.ok(orderInfoService.orderSubmit(orderDetailVo));
+    }
+
+    /**
+     * 平台内添加订单
+     *
+     * @param orderInfoVo 订单信息
+     * @return 结果
+     */
+    @PostMapping("/platform")
+    public R saveOrderByPlatform(OrderInfoVo orderInfoVo) {
+        return R.ok(orderInfoService.orderAdd(orderInfoVo, true));
+    }
+
+    /**
+     * 根据用户月份获取绩效
+     *
+     * @param staffCode 员工编号
+     * @param year      年份
+     * @param month     月份
+     * @return 结果
+     */
+    @GetMapping("/performance")
+    public R selectPerformanceByStaffCodeMonth(@RequestParam("staffCode") String staffCode, @RequestParam(value = "year", required = false) String year, @RequestParam(value = "month", required = false) String month) {
+        return R.ok(orderInfoService.selectPerformanceByStaffCodeMonth(staffCode, year, month));
+    }
+
+    /**
+     * 查询员工订单
+     *
+     * @param staffId 员工编号
+     * @return 订单信息
+     */
+    @GetMapping("/queryOrderByStaffId")
+    public R queryOrderByStaffId(Integer staffId) {
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        StaffInfo staffInfo = staffInfoService.getOne(Wrappers.<StaffInfo>lambdaQuery().eq(StaffInfo::getUserId, staffId));
+        if (staffInfo == null) {
+            result.put("orderCount", 0);
+            result.put("totalAmount", BigDecimal.ZERO);
+            result.put("totalQuantity", 0);
+            return R.ok(result);
+        }
+
+        // 获取该员工的所有订单
+        List<OrderInfo> orderList = orderInfoService.list(Wrappers.<OrderInfo>lambdaQuery().eq(OrderInfo::getStaffId, staffInfo.getId()));
+        if (CollectionUtil.isEmpty(orderList)) {
+            result.put("orderCount", 0);
+            result.put("totalAmount", BigDecimal.ZERO);
+            result.put("totalQuantity", 0);
+            return R.ok(result);
+        }
+
+        // 统计订单数量
+        int orderCount = orderList.size();
+
+        // 统计销售金额（订单总金额）
+        BigDecimal totalAmount = orderList.stream()
+                .map(OrderInfo::getTotalCost)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // 统计药品销售数量
+        List<Integer> orderIds = orderList.stream()
+                .map(OrderInfo::getId)
+                .collect(Collectors.toList());
+
+        List<OrderDetail> detailList = orderDetailService.list(
+                Wrappers.<OrderDetail>lambdaQuery()
+                        .in(OrderDetail::getOrderId, orderIds)
+        );
+
+        int totalQuantity = 0;
+        if (CollectionUtil.isNotEmpty(detailList)) {
+            totalQuantity = detailList.stream()
+                    .mapToInt(OrderDetail::getQuantity)
+                    .filter(Objects::nonNull)
+                    .sum();
+        }
+
+        result.put("orderCount", orderCount);
+        result.put("totalAmount", NumberUtil.round(totalAmount, 2));
+        result.put("totalQuantity", totalQuantity);
+        return R.ok(result);
+    }
+
+    /**
+     * 添加订单
+     *
+     * @param orderInfoVo 订单信息
+     * @return 结果
+     */
+    @PostMapping("/order")
+    public R saveOrder(OrderInfoVo orderInfoVo) {
+        return R.ok(orderInfoService.orderAdd(orderInfoVo, false));
+    }
+
+    /**
+     * 订单付款
+     *
+     * @param orderCode 订单编号
+     * @param staffCode 员工编号
+     * @return 结果
+     */
+    @GetMapping("/payment")
+    public R orderPaymentPlatform(@RequestParam("orderCode") String orderCode, @RequestParam(value = "staffCode", required = false) String staffCode) {
+        orderInfoService.orderPaymentPlatform(orderCode, "平台操作");
+        return R.ok(true);
+    }
+
+    /**
+     * 订单打印小票
+     *
+     * @param orderId 订单ID
+     * @return 结果
+     */
+    @GetMapping("/receipt/export/{orderId}")
+    public R receipt(@PathVariable("orderId") Integer orderId) {
+        return R.ok(orderInfoService.receipt(orderId));
+    }
+
+    /**
+     * 更新订单状态
+     *
+     * @param orderId 订单ID
+     * @param status  状态
+     * @return 结果
+     */
+    @GetMapping("/edit/status")
+    public R setOrderStatus(@RequestParam("orderId") Integer orderId, @RequestParam("status") Integer status) {
+        if (status == 3) {
+            return R.ok(orderInfoService.update(Wrappers.<OrderInfo>lambdaUpdate().set(OrderInfo::getOrderStatus, status).set(OrderInfo::getTakeDate, DateUtil.formatDateTime(new Date())).eq(OrderInfo::getId, orderId)));
+        } else {
+            return R.ok(orderInfoService.update(Wrappers.<OrderInfo>lambdaUpdate().set(OrderInfo::getOrderStatus, status).eq(OrderInfo::getId, orderId)));
+        }
+    }
+
+    /**
+     * 订单发货
+     *
+     * @param orderId 订单ID
+     * @param remark  物流信息
+     * @return 结果
+     */
+    @GetMapping("/ship")
+    public R orderShip(@RequestParam("orderId") Integer orderId, @RequestParam("remark") String remark) {
+        return R.ok(orderInfoService.orderShip(orderId, remark));
+    }
+
+    /**
+     * 获取详情信息
+     *
+     * @param id id
+     * @return 结果
+     */
+    @GetMapping("/{id}")
+    public R detail(@PathVariable("id") Integer id) {
+        return R.ok(orderInfoService.getById(id));
+    }
+
+    /**
+     * 获取详情信息
+     *
+     * @param code code
+     * @return 结果
+     */
+    @GetMapping("/detail/{code}")
+    public R detail(@PathVariable("code") String code) {
+        return R.ok(orderInfoService.getOne(Wrappers.<OrderInfo>lambdaQuery().eq(OrderInfo::getCode, code)));
+    }
+
+    /**
+     * 获取信息列表
+     *
+     * @return 结果
+     */
+    @GetMapping("/list")
+    public R list() {
+        return R.ok(orderInfoService.list());
+    }
+
+    /**
+     * 新增订单信息
+     *
+     * @param orderInfo 订单信息
+     * @return 结果
+     */
+    @PostMapping
+    public R save(OrderInfo orderInfo) {
+        return R.ok(orderInfoService.save(orderInfo));
+    }
+
+    /**
+     * 修改订单信息
+     *
+     * @param orderInfo 订单信息
+     * @return 结果
+     */
+    @PutMapping
+    public R edit(OrderInfo orderInfo) {
+        return R.ok(orderInfoService.updateById(orderInfo));
+    }
+
+    /**
+     * 删除订单信息
+     *
+     * @param ids ids
+     * @return 订单信息
+     */
+    @DeleteMapping("/{ids}")
+    public R deleteByIds(@PathVariable("ids") List<Integer> ids) {
+        return R.ok(orderInfoService.removeByIds(ids));
+    }
+
+}

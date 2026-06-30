@@ -1,0 +1,273 @@
+<template>
+  <a-modal v-model="show" title="订单详情" @cancel="onClose" :width="900">
+    <template slot="footer">
+      <a-button key="back" @click="onClose" type="danger">
+        关闭
+      </a-button>
+    </template>
+    <div style="font-size: 13px;font-family: SimHei" v-if="orderData !== null">
+      <a-row style="padding-left: 24px;padding-right: 24px;">
+        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">基础信息</span></a-col>
+        <a-col :span="8"><b>工单编号：</b>
+          {{ orderData.code }}
+        </a-col>
+        <a-col :span="8"><b>客户姓名：</b>
+          {{ orderData.name ? orderData.name : '- - ' }}
+        </a-col>
+        <a-col :span="8"><b>联系方式：</b>
+          {{ orderData.phone ? orderData.phone : '- - ' }}
+        </a-col>
+         <a-col :span="24" style="margin-top: 25px"><b>收货地址：</b>
+          {{ orderData.address ? orderData.address : '- - ' }}
+        </a-col>
+      </a-row>
+      <br/>
+      <a-row style="padding-left: 24px;padding-right: 24px;" v-if="orderData.userId">
+        <a-col :span="8"><b>支付时间：</b>
+          {{ orderData.payDate ? orderData.payDate : '- -' }}
+        </a-col>
+        <a-col :span="8"><b>发货时间：</b>
+          {{ orderData.shipDate ? orderData.shipDate : '- -' }}
+        </a-col>
+        <a-col :span="8"><b>收货时间：</b>
+          {{ orderData.takeDate ? orderData.takeDate : '- -' }}
+        </a-col>
+        <br/>
+        <br/>
+      </a-row>
+      <a-row style="padding-left: 24px;padding-right: 24px;">
+        <a-col :span="8"><b>当前状态：</b>
+          <span v-if="orderData.orderStatus == 0">待付款</span>
+          <span v-if="orderData.orderStatus == -1">待审核</span>
+          <span v-if="orderData.orderStatus == 1">已下单</span>
+          <span v-if="orderData.orderStatus == 2">配送中</span>
+          <span v-if="orderData.orderStatus == 3">已收货</span>
+        </a-col>
+        <a-col :span="8"><b>订单金额：</b>
+          {{ orderData.totalCost }} 元
+        </a-col>
+        <a-col :span="8"><b>下单时间：</b>
+          {{ orderData.createDate }}
+        </a-col>
+        <a-col :span="24" style="margin-top: 25px"><b>药品凭证：</b>
+          <div v-if="orderData.images && orderData.images.split(',').length > 0" style="margin-top: 10px;">
+            <a-row :gutter="16">
+              <a-col :span="4" v-for="(image, index) in orderData.images.split(',')" :key="index" style="margin-bottom: 10px;">
+                <a-popover>
+                  <template slot="content">
+                    <img :src="'http://127.0.0.1:9527/imagesWeb/' + image" style="max-width: 400px; max-height: 400px;" />
+                  </template>
+                  <img
+                    :src="'http://127.0.0.1:9527/imagesWeb/' + image"
+                    style="width: 100px; height: 100px; object-fit: cover; cursor: pointer; border-radius: 4px;"
+                  />
+                </a-popover>
+              </a-col>
+            </a-row>
+          </div>
+          <div v-else style="margin-top: 10px; color: #999;">暂无药品凭证</div>
+        </a-col>
+      </a-row>
+      <br/>
+      <br/>
+      <a-row style="padding-left: 24px;padding-right: 24px;">
+        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">药店信息</span></a-col>
+        <a-col :span="8"><b>药店名称：</b>
+            {{ orderData.pharmacyName }}
+          </a-col>
+        <a-col :span="8"><b>药店地址：</b>
+          {{ orderData.address }}
+        </a-col>
+        <a-col :span="8"><b>联系方式：</b>
+          {{ orderData.pharmacyPhone }}
+        </a-col>
+      </a-row>
+      <br/>
+      <a-row style="padding-left: 24px;padding-right: 24px;" v-if="medicationInfo != null">
+        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">处方信息</span></a-col>
+        <a-col :span="8"><b>症状及病因：</b>
+          {{ medicationInfo.cause ? medicationInfo.cause : '- -' }}
+        </a-col>
+        <a-col :span="8"><b>出具人：</b>
+          {{ medicationInfo.checkIssuer ? medicationInfo.checkIssuer : '- -' }}
+        </a-col>
+         <a-col :span="8"><b>出具机构：</b>
+          {{ medicationInfo.checkAgency ? medicationInfo.checkAgency : '- -' }}
+        </a-col>
+        <a-col :span="8" style="margin-top: 10px;"><b>审核人：</b>
+          {{ medicationInfo.auditIssuer }}
+        </a-col>
+        <a-col :span="8" style="margin-top: 10px;"><b>审核机构：</b>
+          {{ medicationInfo.auditAgency ? medicationInfo.auditAgency : '- -' }}
+        </a-col>
+        <a-col :span="24" style="margin-top: 10px;"><b>用药建议：</b>
+          {{ medicationInfo.medicationContent ? medicationInfo.medicationContent : '- -' }}
+        </a-col>
+      </a-row>
+      <br/>
+      <a-row style="padding-left: 24px;padding-right: 24px;">
+        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">购买药品信息</span></a-col>
+         <a-col :span="24">
+          <a-table :columns="columns" :data-source="durgList">
+          </a-table>
+        </a-col>
+      </a-row>
+      <br/>
+      <a-row style="padding-left: 24px;padding-right: 24px;">
+        <a-col style="margin-bottom: 15px"><span style="font-size: 15px;font-weight: 650;color: #000c17">配送物流</span></a-col>
+         <a-col :span="24">
+          <a-table :columns="logisticsColumns" :data-source="logisticsList">
+          </a-table>
+        </a-col>
+      </a-row>
+    </div>
+  </a-modal>
+</template>
+
+<script>
+import moment from 'moment'
+moment.locale('zh-cn')
+function getBase64 (file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = error => reject(error)
+  })
+}
+export default {
+  name: 'orderView',
+  props: {
+    orderShow: {
+      type: Boolean,
+      default: false
+    },
+    orderData: {
+      type: Object
+    }
+  },
+  computed: {
+    show: {
+      get: function () {
+        return this.orderShow
+      },
+      set: function () {
+      }
+    },
+    logisticsColumns () {
+      return [{
+        title: '配送信息',
+        dataIndex: 'remark'
+      }, {
+        title: '操作时间',
+        dataIndex: 'createDate'
+      }]
+    },
+    columns () {
+      return [{
+        title: '药品名称',
+        dataIndex: 'drugName'
+      }, {
+        title: '品牌',
+        dataIndex: 'brand'
+      }, {
+        title: '数量',
+        dataIndex: 'quantity'
+      }, {
+        title: '药品图片',
+        dataIndex: 'images',
+        customRender: (text, record, index) => {
+          if (!record.images) return <a-avatar shape="square" icon="user" />
+          return <a-popover>
+            <template slot="content">
+              <a-avatar shape="square" size={132} icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
+            </template>
+            <a-avatar shape="square" icon="user" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
+          </a-popover>
+        }
+      }, {
+        title: '售价',
+        dataIndex: 'unitPrice'
+      }]
+    },
+    logisticsColumns () {
+      return [{
+        title: '配送信息',
+        dataIndex: 'remark'
+      }, {
+        title: '操作时间',
+        dataIndex: 'createDate'
+      }]
+    }
+  },
+  data () {
+    return {
+      loading: false,
+      fileList: [],
+      previewVisible: false,
+      previewImage: '',
+      repairInfo: null,
+      reserveInfo: null,
+      durgList: [],
+      logisticsList: [],
+      current: 0,
+      medicationInfo: null
+    }
+  },
+  watch: {
+    orderShow: function (value) {
+      if (value) {
+        this.dataInit(this.orderData.id, this.orderData.code)
+        this.current = this.orderData.orderStatus
+      }
+    }
+  },
+  methods: {
+    dataInit (orderId, code) {
+      // 药品信息
+      this.$get(`/cos/order-detail/detail/${orderId}`).then((r) => {
+        this.durgList = r.data.data
+      })
+      // 配送信息
+      this.$get(`/cos/logistics-info/order/${orderId}`).then((r) => {
+        this.logisticsList = r.data.data
+      })
+      // 电子处方
+      this.$get(`/cos/medication-info/queryMedicationByOrder`, {
+        orderCode: code
+      }).then((r) => {
+        this.medicationInfo = r.data.data
+      })
+    },
+    imagesInit (images) {
+      if (images !== null && images !== '') {
+        let imageList = []
+        images.split(',').forEach((image, index) => {
+          imageList.push({uid: index, name: image, status: 'done', url: 'http://127.0.0.1:9527/imagesWeb/' + image})
+        })
+        this.fileList = imageList
+      }
+    },
+    handleCancel () {
+      this.previewVisible = false
+    },
+    async handlePreview (file) {
+      if (!file.url && !file.preview) {
+        file.preview = await getBase64(file.originFileObj)
+      }
+      this.previewImage = file.url || file.preview
+      this.previewVisible = true
+    },
+    picHandleChange ({ fileList }) {
+      this.fileList = fileList
+    },
+    onClose () {
+      this.$emit('close')
+    }
+  }
+}
+</script>
+
+<style scoped>
+
+</style>
