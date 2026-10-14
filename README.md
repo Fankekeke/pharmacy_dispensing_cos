@@ -6,7 +6,9 @@
 
 # 药店药品调配系统 (Pharmacy Drug Dispensing System)
 
-一套专为现代化连锁及单体药店设计的全链路数字化管理系统。本系统集成了**多角色权限管理、进销存一体化、电子处方流转、财务薪资结算**等核心业务模块，旨在帮助药店实现精细化运营，提升处方调配效率与库存周转率。
+药品库存管理 · 电子处方流转 · 多门店调配 · 供应链协同 · 在线购药
+
+本项目是一套面向连锁药店的药品调配与运营管理平台，采用前后端分离架构，覆盖管理员、药店、员工、用户四类角色。平台围绕“药品采购、库存调配、处方审核、订单履约、配送结算、员工管理、用户购药”等核心业务设计，支持多药店库存联动、电子处方流转、供应链采购管理、销售数据统计与在线购药服务，适用于连锁药店、医药零售企业及智慧药房场景。
 
 
 #### 安装环境
@@ -41,50 +43,135 @@ WebStorm OR VScode 编译器 [https://www.jianshu.com/p/d63b5bae9dff]
 
 ## 核心特性
 
-- **多门店/多角色协同**：完美支持 管理员、药店、员工、用户 四大角色，数据权限严格隔离。
-- **全生命周期药品管理**：涵盖采购、入库、库存调配、预警及出库全流程。
-- **电子处方流转**：支持在线处方审核、调配记录与追溯，保障用药安全。
-- **多维度数据看板**：提供销售排行、库存统计、员工绩效等可视化报表。
-- **业财一体化**：打通在线支付、缴费记录与员工薪资发放链路。
+- **多角色协同运营**：打通管理员、药店、员工、用户四端，实现采购、调配、销售、配送全流程闭环。
+- **药品库存智能调配**：支持多药店库存查询、库存预警、出入库管理及门店间药品调配，降低缺货与积压风险。
+- **电子处方流转**：支持用户上传与查看处方，药店与员工在线审核处理，保障处方药销售合规。
+- **供应链一体化管理**：覆盖供应商管理、药品采购、采购物流跟踪，提升采购效率与药品溯源能力。
+- **多维度数据看板**：提供销售统计、销售排行、订单看板、库存统计等可视化分析，辅助经营决策。
+- **在线购药与配送**：用户可在线浏览药品、下单支付、查看处方与订单物流，享受便捷购药服务。
+- **员工绩效与薪资管理**：记录员工销售数据、岗位变动与薪资发放，支持员工留言沟通。
+
+---
+
+## 适用场景
+
+- 连锁药店多门店库存调配与管理
+- 处方药在线审核与销售合规管理
+- 药店供应链采购与物流跟踪
+- 用户在线购药与配送服务
+- 药店员工绩效与薪资管理
 
 ---
 
 ## ️ 功能模块概览
 
-### ️ 管理员
+### 管理员端
 
-全局统筹与底层数据维护，掌控系统运行命脉。
+管理员端负责平台全局统筹、供应链管理与底层数据维护：
 
-- **数据看板**：首页订单看板、销售统计、销售排行
-- **组织与人事**：员工管理、职位变动、薪资发放、用户/管理员管理
-- **药品与库存**：药品管理、电子处方、库存统计、库房预警、药店库存、库存调整/调配
-- **订单与财务**：订单管理/详情、订单评价、配送信息、缴费记录
-- **供应链**：供应商管理、药品采购、采购物流、药店管理、公告管理
+**数据看板与统计**
 
-### 药店
+- **首页订单看板**：实时展示全平台订单量、待处理订单、配送中订单等关键指标。
+- **销售统计**：按日、周、月统计药品销售金额、销量与增长趋势。
+- **销售排行**：统计热门药品、热门药店、热门员工销售排行。
 
-门店日常运营与人员调度中心。
+**组织与人事管理**
 
-- **门店看板**：商家订单看板
-- **人员管理**：员工管理、岗位调整、员工薪资、员工留言
-- **业务处理**：订单管理/详情、电子处方
-- **库存流转**：药店库存、库存调整、出入库详情、药店信息
+- **员工管理**：管理平台员工账号、所属药店、岗位信息与工作状态。
+- **职位变动**：记录员工岗位调整、晋升或调动历史。
+- **薪资发放**：核算员工薪资，记录发放明细与发放状态。
+- **用户 / 管理员管理**：管理注册用户与后台管理员账号权限。
 
-### 员工
+**药品与库存管理**
 
-一线销售与调配人员的高效工作台。
+- **药品管理**：维护药品基础信息，包括名称、规格、厂家、价格、处方标识等。
+- **电子处方**：监管平台处方记录，支持处方审核与归档。
+- **库存统计**：查看全平台及各药店库存总量、库存周转率等数据。
+- **库房预警**：设置库存上下限，自动预警低库存、近效期与滞销药品。
+- **药店库存**：查看各药店实时库存分布与药品存量。
+- **库存调整 / 调配**：执行药店间药品调拨、库存修正与批次调整。
 
-- **个人看板**：员工销售看板
-- **业务执行**：药品记录、电子处方处理、订单管理
-- **个人事务**：我的信息、我的薪资、我的留言
+**订单与财务管理**
 
-### 用户
+- **订单管理 / 详情**：查看全平台订单状态、药品明细、支付方式与配送信息。
+- **订单评价**：查看用户对订单与药品的评分及文字反馈。
+- **配送信息**：跟踪订单配送状态、物流轨迹与签收情况。
+- **缴费记录**：查询用户支付流水、退款记录与财务对账明细。
 
-便捷的 C 端购药与健康管理入口。
+**供应链管理**
 
-- **购药体验**：药品购买、在线支付、药品处方查看
-- **订单服务**：我的订单、订单评价、缴费记录
-- **个人设置**：个人信息管理
+- **供应商管理**：维护药品供应商资质、联系方式与合作状态。
+- **药品采购**：创建采购计划、生成采购订单并跟踪采购进度。
+- **采购物流**：记录采购物流信息，跟踪药品入库进度。
+- **药店管理**：管理各药店基本信息、营业状态与负责人。
+- **公告管理**：发布平台通知、政策调整与系统维护公告。
+
+### 药店端
+
+药店端作为门店日常运营中心，负责订单处理、库存流转与人员调度：
+
+**门店看板**
+
+- **商家订单看板**：实时查看本店待处理、配送中、已完成订单及今日销售数据。
+
+**人员管理**
+
+- **员工管理**：管理本店员工账号、排班与岗位分配。
+- **岗位调整**：调整本店员工岗位与职责分工。
+- **员工薪资**：查看本店员工薪资核算数据与发放记录。
+- **员工留言**：接收并回复员工留言，处理内部沟通事项。
+
+**业务处理**
+
+- **订单管理 / 详情**：处理本店订单，确认药品、审核处方、安排配药与发货。
+- **电子处方**：查看用户上传的处方信息，进行处方审核与记录存档。
+
+**库存流转**
+
+- **药店库存**：查看本店药品实时库存、批次与效期信息。
+- **库存调整**：执行本店库存盘点、损耗登记与库存修正。
+- **出入库详情**：记录药品入库、出库、调拨与退货明细。
+- **药店信息**：维护药店名称、地址、营业时间、联系电话等基础信息。
+
+### 员工端
+
+员工端为一线销售与调配人员提供高效工作台：
+
+**个人看板**
+
+- **员工销售看板**：查看个人今日销售额、订单量、配药数量等绩效数据。
+
+**业务执行**
+
+- **药品记录**：录入药品上架、盘点、效期检查等日常操作记录。
+- **电子处方处理**：接收并处理待审核处方，完成处方药销售确认。
+- **订单管理**：查看分配给自己的订单，完成配药、打包与发货操作。
+
+**个人事务**
+
+- **我的信息**：查看与修改个人基本信息、联系方式与岗位信息。
+- **我的薪资**：查看个人薪资明细、发放记录与绩效统计。
+- **我的留言**：向药店或管理员发送留言，反馈工作问题与建议。
+
+### 用户端
+
+用户端以小程序或 H5 为主要入口，提供便捷的在线购药体验：
+
+**购药体验**
+
+- **药品购买**：浏览药品分类、搜索药品、查看详情并加入购物车下单。
+- **在线支付**：支持微信支付、支付宝等方式完成购药支付。
+- **药品处方查看**：查看已上传或药店审核通过的电子处方记录。
+
+**订单服务**
+
+- **我的订单**：查看待支付、待发货、配送中、已完成等订单状态与详情。
+- **订单评价**：对已完成的购药订单进行评分与文字评价。
+- **缴费记录**：查看历史支付明细、退款记录与消费账单。
+
+**个人设置**
+
+- **个人信息管理**：维护姓名、联系方式、收货地址等个人资料。
 
 ---
 
@@ -121,7 +208,7 @@ pharmacy-dispensing-system/
 admin
 1234qwer
 
-[商家管理员]
+[药店]
 shangjia
 1234qwer
 
@@ -133,20 +220,20 @@ fank
 
 |  |  |
 |---------------------|---------------------|
-| ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/0a434def-3738-466e-8f82-b2092cde0c39.png) | ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/199caebe-c7ec-431b-bdac-26f643b5fad5.png) |
-| ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/e96504ec-7a4c-404f-af46-b3d0a957b3fa.png) | ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/93df1307-f85d-4bff-b8ee-86210dd766b4.png) |
-| ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/ca0f79dd-3feb-42df-b404-5d22ef1db7a2.png) | ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/79c34183-cd3a-4945-a932-f4826892fcc5.png) |
-| ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/c5f55665-e349-44b4-af82-52173a2aea44.png) | ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/36e7671c-8089-45db-ac8e-191513a6265d.png) |
-| ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/c2c0e9f8-13f9-41bb-a83a-d498d422f226.png) | ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/28fc6704-c8d6-4121-af4f-c57bd2b0525a.png) |
-| ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/ba905605-3956-43c9-bd1c-418012a1c533.png) | ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/19d5c93b-7190-423d-83d0-b5b3a22d1906.png) |
-| ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/b68046a2-0d95-4dc7-a11b-d495ff39af90.png) | ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/010bd7ec-86a1-4a76-ab70-7bc379d84493.png) |
-| ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/a8bba953-3994-41b1-b762-c3db8ad61387.png) | ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/8c37d64d-e729-4d09-9548-4bfab331a894.png) |
-| ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/49260112-d9f5-4f61-9dd1-d24f198915ad.png) | ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/6ab683ed-2544-471a-a526-ca2c96e892bc.png) |
-| ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/6186a2b8-d76e-405b-b3d5-bb44f7d1bd6e.png) | ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/4d3cc96b-84e6-450d-98c0-8d24ab6a65a0.png) |
-| ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/519a5e02-03ef-48cd-89a6-858ef60a6b8c.png) | ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/3fbfba72-2298-4d3c-9904-cd150be5c425.png) |
-| ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/471be86f-9fd7-4d59-a49a-44ed40e03c94.png) | ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/2bfd9cc2-ea57-4032-b45f-a9880f2b2ce2.png) |
-| ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/309cd591-11b5-48e9-922b-4e730548e943.png) | ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/0df655e6-a5f2-4110-8751-4b90a48d2f09.png) |
-| ![](https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/282db690-6b37-4415-8b4e-97956828e1a5.png) |  |
+| ![](./assets/image%20(1).png) | ![](./assets/image%20(2).png) |
+| ![](./assets/image%20(3).png) | ![](./assets/image%20(4).png) |
+| ![](./assets/image%20(5).png) | ![](./assets/image%20(6).png) |
+| ![](./assets/image%20(7).png) | ![](./assets/image%20(8).png) |
+| ![](./assets/image%20(9).png) | ![](./assets/image%20(10).png) |
+| ![](./assets/image%20(11).png) | ![](./assets/image%20(12).png) |
+| ![](./assets/image%20(13).png) | ![](./assets/image%20(14).png) |
+| ![](./assets/image%20(15).png) | ![](./assets/image%20(16).png) |
+| ![](./assets/image%20(17).png) | ![](./assets/image%20(18).png) |
+| ![](./assets/image%20(19).png) | ![](./assets/image%20(20).png) | 
+| ![](./assets/image%20(21).png) | ![](./assets/image%20(22).png) | 
+| ![](./assets/image%20(23).png) | ![](./assets/image%20(24).png) | 
+| ![](./assets/image%20(25).png) | ![](./assets/image%20(26).png) | 
+| ![](./assets/image%20(27).png) |  | 
 
 #### 演示视频
 
@@ -163,6 +250,8 @@ WeChat: `Storm_Berserker`
 > 1.项目纯原创，不做二手贩子 2.一次购买终身有效 3.项目讲解持续到答辩结束 4.非常负责的答辩指导 5.**黑奴价格**
 
 > 项目部署调试不好包退！功能逻辑没讲明白包退！
+
+<div align=center><img align="center" src="./assets/product_word.png" alt="fankekeke" /></div>
 
 #### 其它资源
 [2026年-答辩顺利通过-客户评价🀄](https://berserker287.github.io/2026/06/29/2026%E5%B9%B4%E7%AD%94%E8%BE%A9%E9%A1%BA%E5%88%A9%E9%80%9A%E8%BF%87/)
@@ -189,4 +278,8 @@ WeChat: `Storm_Berserker`
 
 More info: [悲伤的橘子树](https://berserker287.github.io/)
 
-<p><img align="center" src="https://fank-bucket-oss.oss-cn-beijing.aliyuncs.com/img/%E5%90%88%E4%BD%9C%E7%89%A9%E6%96%99%E6%A0%B7%E5%BC%8F%20(3).png" alt="fankekeke" /></p>
+<div align="center"><img align="center" src="./assets/chat_qr_code.png" alt="fankekeke" width=250 /></div>
+
+<p><img align="center" src="./assets/wechat_group.png" alt="fankekeke" /></p>
+
+**感谢查看**
